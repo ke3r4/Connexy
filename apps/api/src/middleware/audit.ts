@@ -32,14 +32,13 @@ export const auditMiddleware: MiddlewareHandler<AppContext> = async (c, next) =>
     timestamp: new Date().toISOString(),
   };
 
+  const doId = c.env.AUDIT_LOG.idFromName(tenantId);
+  const stub = c.env.AUDIT_LOG.get(doId);
   c.executionCtx.waitUntil(
-    c.env.AUDIT_LOG.idFromString(c.env.AUDIT_LOG.idFromName(tenantId).toString()).fetch(
-      'https://internal/audit',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(auditEntry),
-      },
-    ).catch((err: unknown) => console.error('Audit write failed:', err)),
+    stub.fetch('https://internal/audit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(auditEntry),
+    }).catch((err: unknown) => console.error('Audit write failed:', err)),
   );
 };

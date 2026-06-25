@@ -35,6 +35,18 @@ app.use('*', cors({
 app.use('*', errorHandler);
 app.use('*', auditMiddleware);
 
+// Global error handler as fallback
+app.onError((err, c) => {
+  console.error('Global error handler:', err);
+  return c.json({
+    error: {
+      code: 'INTERNAL_ERROR',
+      message: err instanceof Error ? err.message : 'Internal server error',
+      statusCode: 500,
+    },
+  }, 500);
+});
+
 app.route('/health', healthRoutes);
 app.route('/api/auth', authRoutes);
 

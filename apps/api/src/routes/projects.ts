@@ -43,6 +43,13 @@ projectRoutes.post('/', requireRole('admin', 'architect', 'engineer'), async (c)
   const userId = c.get('userId');
   const body = await c.req.json();
 
+  if (!body.name || !body.intent || !body.workflowType) {
+    throw new ValidationError('name, intent, and workflowType are required');
+  }
+  if (!['mes-to-machine', 'kpi-dashboard'].includes(body.workflowType)) {
+    throw new ValidationError('workflowType must be mes-to-machine or kpi-dashboard');
+  }
+
   const projectData = {
     id: crypto.randomUUID(),
     tenantId,
@@ -55,11 +62,6 @@ projectRoutes.post('/', requireRole('admin', 'architect', 'engineer'), async (c)
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-
-  const parsed = ProjectSchema.partial().safeParse(projectData);
-  if (!parsed.success) {
-    throw new ValidationError('Invalid project data', parsed.error.flatten());
-  }
 
   await c.env.DB.prepare(
     `INSERT INTO projects (id, tenant_id, name, description, workflow_type, intent, status, project_price_usd, model_spend_cap_usd, model_spend_cap_percentage, created_by, created_at, updated_at)

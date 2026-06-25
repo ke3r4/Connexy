@@ -3,7 +3,9 @@ import type {
   WorkflowState, ExportPackage, ReviewQueue, MetadataObject, ProjectCost,
 } from './types.js';
 
-const API_BASE = '/api';
+const API_BASE = import.meta.env.PROD
+  ? 'https://connexy-api.becem-bejaoui.workers.dev/api'
+  : '/api';
 
 function getAuthHeaders(): Record<string, string> {
   const token = localStorage.getItem('connexy_token') || '';
