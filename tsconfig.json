@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "declaration": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "paths": {
+      "@connexy/shared": ["./packages/shared/src"],
+      "@connexy/shared/*": ["./packages/shared/src/*"],
+      "@connexy/connectors": ["./packages/connectors/src"],
+      "@connexy/ai-engine": ["./packages/ai-engine/src"]
+    }
+  },
+  "include": ["packages/*/src/**/*.ts", "apps/*/src/**/*.ts", "apps/*/src/**/*.tsx"],
+  "exclude": ["node_modules", "dist"]
+}

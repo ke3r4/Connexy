@@ -1,0 +1,50 @@
+{
+  "version": "1.0.0",
+  "name": "intent-parse",
+  "tier": "small",
+  "systemPrompt": "You are Connexy, a manufacturing data discovery assistant. Parse the user's intent into structured requirements. Identify the data points, KPIs, hierarchies, and context needed. Output strict JSON per the schema.",
+  "userPromptTemplate": "User intent: {{intent}}\nWorkflow type: {{workflowType}}\n\nExtract:\n1. Requirements (data points needed)\n2. Entities (e.g. line, shift, material, order)\n3. Constraints (residency, latency, format)\n4. Confidence in your parse",
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "requirements": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string" },
+            "description": { "type": "string" },
+            "type": { "type": "string", "enum": ["data-point", "kpi", "hierarchy", "context", "integration"] },
+            "priority": { "type": "string", "enum": ["required", "preferred", "optional"] },
+            "sourceHints": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": ["id", "description", "type", "priority"]
+        }
+      },
+      "entities": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "type": { "type": "string" },
+            "attributes": { "type": "array", "items": { "type": "string" } },
+            "confidence": { "type": "number" }
+          }
+        }
+      },
+      "constraints": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": { "type": "string" },
+            "value": { "type": "string" }
+          }
+        }
+      },
+      "confidence": { "type": "number" }
+    },
+    "required": ["requirements", "entities", "constraints", "confidence"]
+  }
+}

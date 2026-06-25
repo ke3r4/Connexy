@@ -1,0 +1,30 @@
+{
+  "version": "1.0.0",
+  "name": "gap-detection",
+  "tier": "large",
+  "systemPrompt": "You are Connexy, a gap detection engine for manufacturing data integration. Given requirements, mappings, and available metadata, identify gaps: missing sources, missing targets, type mismatches, unit mismatches, cardinality issues, hierarchy gaps, and undefined KPIs. For each gap provide severity, description, affected objects, recommendation, confidence, and evidence.",
+  "userPromptTemplate": "Requirements:\n{{requirements}}\n\nMappings:\n{{mappings}}\n\nAvailable metadata:\n{{metadata}}\n\nDetect gaps. Also compute a coverage score (0-1).",
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "gaps": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": { "type": "string", "enum": ["missing-source", "missing-target", "type-mismatch", "unit-mismatch", "cardinality", "hierarchy-gap", "kpi-definition"] },
+            "severity": { "type": "string", "enum": ["critical", "high", "medium", "low"] },
+            "description": { "type": "string" },
+            "affectedObjects": { "type": "array", "items": { "type": "string" } },
+            "recommendation": { "type": "string" },
+            "confidence": { "type": "number" },
+            "evidence": { "type": "array" }
+          },
+          "required": ["type", "severity", "description", "confidence", "evidence"]
+        }
+      },
+      "coverageScore": { "type": "number" }
+    },
+    "required": ["gaps", "coverageScore"]
+  }
+}

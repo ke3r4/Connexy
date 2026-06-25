@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connexy.dev/contracts/audit-entry.json",
+  "title": "AuditEntry",
+  "description": "Append-only, immutable audit entry with hash chaining for tamper-evidence (Prime Directive 4).",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "tenantId": { "type": "string", "format": "uuid" },
+    "projectId": { "type": "string", "format": "uuid" },
+    "userId": { "type": "string", "format": "uuid" },
+    "action": { "type": "string" },
+    "entityType": { "type": "string" },
+    "entityId": { "type": "string" },
+    "before": { "type": "object" },
+    "after": { "type": "object" },
+    "metadata": { "type": "object" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "hash": { "type": "string", "description": "SHA-256 hash of this entry + prevHash" },
+    "prevHash": { "type": "string", "description": "Hash of the previous entry in the chain (null for genesis)" }
+  },
+  "required": ["id", "tenantId", "action", "entityType", "entityId", "timestamp", "hash"]
+}

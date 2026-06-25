@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connexy.dev/contracts/model-router-request.json",
+  "title": "ModelRouterRequest",
+  "description": "Request contract for the AI model router. Provider/model/hosting are configuration via AI Gateway.",
+  "type": "object",
+  "properties": {
+    "tier": { "type": "string", "enum": ["small", "large", "medium", "embedding"] },
+    "systemPrompt": { "type": "string" },
+    "userPrompt": { "type": "string" },
+    "responseSchema": { "type": "object" },
+    "maxTokens": { "type": "integer" },
+    "temperature": { "type": "number" },
+    "projectId": { "type": "string", "format": "uuid" },
+    "tenantId": { "type": "string", "format": "uuid" },
+    "stage": { "type": "string", "enum": ["plan", "ingest", "classify", "map", "model", "score", "review", "export"] },
+    "metadataReuseKey": { "type": "string", "description": "Cache key for application-level metadata reuse to avoid re-sending identical context" }
+  },
+  "required": ["tier", "systemPrompt", "userPrompt", "projectId", "tenantId", "stage"]
+}

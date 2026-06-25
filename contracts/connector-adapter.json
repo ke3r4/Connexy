@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connexy.dev/contracts/connector-adapter.json",
+  "title": "ConnectorAdapterContract",
+  "description": "The read-only connector adapter interface. No write methods exist by design (Prime Directive 1).",
+  "type": "object",
+  "properties": {
+    "manifest": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "displayName": { "type": "string" },
+        "tier": { "type": "string", "enum": ["erp", "mes", "historian", "scada", "machine", "file"] },
+        "version": { "type": "string" },
+        "scope": { "type": "array", "items": { "type": "string" } },
+        "capabilities": {
+          "type": "object",
+          "properties": {
+            "canRead": { "type": "boolean", "const": true },
+            "canWrite": { "type": "boolean", "const": false },
+            "canStream": { "type": "boolean" },
+            "supportsBatch": { "type": "boolean" },
+            "supportsIncremental": { "type": "boolean" },
+            "maxObjectCount": { "type": "integer" }
+          },
+          "required": ["canRead", "canWrite"]
+        }
+      },
+      "required": ["type", "displayName", "tier", "capabilities"]
+    },
+    "scanReadOnly": {
+      "type": "object",
+      "description": "Method signature: (config: ConnectorConfig) => Promise<ReadOnlyScanResult>. Returns read-only metadata only.",
+      "properties": {
+        "input": { "$ref": "#/$defs/connectorConfig" },
+        "output": { "$ref": "#/$defs/readOnlyScanResult" }
+      }
+    },
+    "testScan": {
+      "type": "object",
+      "description": "Method signature: (config: ConnectorConfig) => Promise<{ success, message, objectCount }>. Non-destructive test scan.",
+      "properties": {
+        "input": { "$ref": "#/$defs/connectorConfig" },
+        "output": {
+          "type": "object",
+          "properties": {
+            "success": { "type": "boolean" },
+            "message": { "type": "string" },
+            "objectCount": { "type": "integer" }
+          }
+        }
+      }
+    }
+  },
+  "required": ["manifest", "scanReadOnly", "testScan"],
+  "$defs": {
+    "connectorConfig": {
+      "type": "object",
+      "properties": {
+        "baseUrl": { "type": "string" },
+        "scope": { "type": "array", "items": { "type": "string" } },
+        "readOnlyAssertion": { "type": "boolean", "const": true },
+        "testScan": { "type": "boolean" }
+      },
+      "required": ["readOnlyAssertion"]
+    },
+    "readOnlyScanResult": {
+      "type": "object",
+      "properties": {
+        "connectorId": { "type": "string" },
+        "objects": { "type": "array" },
+        "errors": { "type": "array" },
+        "scannedAt": { "type": "string", "format": "date-time" },
+        "objectCount": { "type": "integer" },
+        "readOnlyVerified": { "type": "boolean", "const": true }
+      },
+      "required": ["connectorId", "objects", "scannedAt", "readOnlyVerified"]
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "version": "1.0.0",
+  "name": "classify-metadata",
+  "tier": "small",
+  "systemPrompt": "You are Connexy, a manufacturing metadata classifier. Given a list of metadata objects (tags, fields, tables), classify each into one of: production-count, machine-state, downtime-reason, batch-context, material, order, shift, line, kpi-component, other. Output strict JSON.",
+  "userPromptTemplate": "Classify these metadata objects:\n{{objects}}\n\nFor each object provide: objectId, category, confidence (0-1), reasoning.",
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "classifications": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "objectId": { "type": "string" },
+            "category": { "type": "string", "enum": ["production-count", "machine-state", "downtime-reason", "batch-context", "material", "order", "shift", "line", "kpi-component", "other"] },
+            "confidence": { "type": "number" },
+            "reasoning": { "type": "string" }
+          },
+          "required": ["objectId", "category", "confidence", "reasoning"]
+        }
+      }
+    },
+    "required": ["classifications"]
+  }
+}

@@ -1,0 +1,160 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ──────────────────────────────────────────────────
+  # PRIME DIRECTIVE SAFETY GATES (must pass to merge)
+  # ──────────────────────────────────────────────────
+  pd1-read-only-gate:
+    name: "PD1: Read-Only Safety Gate"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci --legacy-peer-deps
+      - name: Run read-only safety suite (63 tests across 12 connectors)
+        run: npx vitest run packages/connectors/src/__tests__/read-only.test.ts --reporter=verbose
+      - name: Verify no write methods exist on adapter interface
+        run: |
+          ! grep -r "async write\|async update\|async delete\|async create\|async push\|async put" packages/connectors/src/adapter.ts || \
+          (echo "VIOLATION: Write method found on connector adapter interface" && exit 1)
+
+  pd4-audit-gate:
+    name: "PD4: Audit Chain Integrity Gate"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci --legacy-peer-deps
+      - name: Run audit chain integrity tests (hash-chaining + tamper detection)
+        run: npx vitest run apps/api/src/__tests__/audit.test.ts --reporter=verbose
+
+  pd5-residency-gate:
+    name: "PD5: Data Residency Gate"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci --legacy-peer-deps
+      - name: Verify residency assertion exists in model router
+        run: |
+          grep -q "assertResidency" packages/ai-engine/src/router.ts && \
+          grep -q "DataResidencyError" packages/ai-engine/src/router.ts && \
+          grep -q "assertResidency" packages/ai-engine/src/__tests__/router.test.ts || \
+          (echo "VIOLATION: Data residency enforcement missing" && exit 1)
+      - name: Run AI engine tests (includes residency assertion test)
+        run: npx vitest run packages/ai-engine/src/__tests__/router.test.ts --reporter=verbose
+
+  pd6-cost-gate:
+    name: "PD6: Cost Telemetry Gate"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci --legacy-peer-deps
+      - name: Verify cost tracking exists on every model call path
+        run: |
+          grep -q "recordCost" packages/ai-engine/src/router.ts && \
+          grep -q "recordCost" packages/ai-engine/src/workers-ai-runner.ts && \
+          grep -q "getProjectCost" packages/ai-engine/src/router.ts && \
+          grep -q "getProjectCost" packages/ai-engine/src/workers-ai-runner.ts || \
+          (echo "VIOLATION: Cost tracking missing on model call path" && exit 1)
+
+  # ──────────────────────────────────────────────────
+  # UNIT + INTEGRATION TESTS
+  # ──────────────────────────────────────────────────
+  unit-tests:
+    name: "Unit + Integration Tests"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci --legacy-peer-deps
+      - name: Run all tests
+        run: npx vitest run --reporter=verbose
+
+  # ──────────────────────────────────────────────────
+  # E2E WORKFLOW TESTS
+  # ──────────────────────────────────────────────────
+  e2e-tests:
+    name: "E2E Workflow Tests (A + B)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci --legacy-peer-deps
+      - name: Workflow A (MES-to-Machine) E2E
+        run: npx vitest run apps/api/src/__tests__/workflow-a-e2e.test.ts --reporter=verbose
+      - name: Workflow B (KPI Dashboard) E2E
+        run: npx vitest run apps/api/src/__tests__/workflow-b.test.ts --reporter=verbose
+
+  # ──────────────────────────────────────────────────
+  # COMPLIANCE DOSSIER TESTS
+  # ──────────────────────────────────────────────────
+  compliance-tests:
+    name: "Compliance Dossier Tests"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci --legacy-peer-deps
+      - name: Compliance dossier (ALCOA+ + SoD + read-only evidence)
+        run: npx vitest run packages/data/src/__tests__/compliance.test.ts --reporter=verbose
+
+  # ──────────────────────────────────────────────────
+  # BUILD
+  # ──────────────────────────────────────────────────
+  build-frontend:
+    name: "Build Frontend (Vite → Pages)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci --legacy-peer-deps
+      - name: Build frontend
+        run: npx vite build
+        working-directory: apps/web
+      - name: Verify dist exists
+        run: test -f apps/web/dist/index.html
+
+  # ──────────────────────────────────────────────────
+  # GATE SUMMARY (all must pass)
+  # ──────────────────────────────────────────────────
+  release-gate:
+    name: "Release Gate — All Prime Directives"
+    runs-on: ubuntu-latest
+    needs: [pd1-read-only-gate, pd4-audit-gate, pd5-residency-gate, pd6-cost-gate, unit-tests, e2e-tests, compliance-tests, build-frontend]
+    steps:
+      - name: All gates passed
+        run: |
+          echo "=== RELEASE GATE PASSED ==="
+          echo "PD1 Read-only:          GREEN"
+          echo "PD4 Auditable:          GREEN"
+          echo "PD5 Data residency:     GREEN"
+          echo "PD6 Cost-disciplined:   GREEN"
+          echo "Unit + Integration:     GREEN"
+          echo "E2E Workflow A + B:     GREEN"
+          echo "Compliance dossier:     GREEN"
+          echo "Frontend build:         GREEN"
+          echo "==========================="

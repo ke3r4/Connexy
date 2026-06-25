@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connexy.dev/contracts/mapping-proposal.json",
+  "title": "MappingProposal",
+  "description": "A proposed source-to-target mapping from the AI engine. Must include confidence and evidence.",
+  "type": "object",
+  "properties": {
+    "sourceObjectId": { "type": "string", "format": "uuid" },
+    "targetObjectId": { "type": "string" },
+    "transformation": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["direct", "expression", "lookup", "aggregation", "concat", "conditional"] },
+        "expression": { "type": "string" },
+        "parameters": { "type": "object" }
+      }
+    },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "evidence": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/evidence" },
+      "minItems": 1
+    },
+    "reasoning": { "type": "string", "minLength": 1 }
+  },
+  "required": ["sourceObjectId", "targetObjectId", "confidence", "evidence", "reasoning"],
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["metadata", "sample", "naming", "semantic", "lineage", "human"] },
+        "sourceRef": { "type": "string" },
+        "description": { "type": "string" },
+        "weight": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["type", "sourceRef", "description", "weight"]
+    }
+  }
+}

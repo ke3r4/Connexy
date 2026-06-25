@@ -1,0 +1,3 @@
+MISTRAL_API_KEY=your-mistral-api-key
+AI_GATEWAY_ID=your-cloudflare-ai-gateway-id
+JWT_SECRET=your-jwt-secret

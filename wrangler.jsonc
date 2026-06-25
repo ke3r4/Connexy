@@ -1,0 +1,90 @@
+{
+  "$schema": "https://schema.wrangler.dev/worker-3.60.json",
+  "name": "connexy-api",
+  "main": "apps/api/src/index.ts",
+  "compatibility_date": "2024-06-24",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "ENVIRONMENT": "development"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "connexy",
+      "database_id": "local-dev-db"
+    }
+  ],
+  "vectorize": [
+    {
+      "binding": "VECTORIZE",
+      "index_name": "connexy-embeddings"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "R2_BUCKET",
+      "bucket_name": "connexy-exports"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "AUDIT_LOG",
+        "class_name": "AuditLogDO"
+      },
+      {
+        "name": "PROJECT_COORDINATOR",
+        "class_name": "ProjectCoordinatorDO"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_classes": ["AuditLogDO", "ProjectCoordinatorDO"]
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "KV_CONFIG",
+      "id": "local-kv-config"
+    },
+    {
+      "binding": "KV_SESSIONS",
+      "id": "local-kv-sessions"
+    }
+  ],
+  "queues": [
+    {
+      "binding": "INGEST_QUEUE",
+      "queue_name": "ingest-queue"
+    },
+    {
+      "binding": "EXPORT_QUEUE",
+      "queue_name": "export-queue"
+    }
+  ],
+  "workflows": [
+    {
+      "name": "DISCOVERY_WORKFLOW",
+      "binding": "DISCOVERY_WORKFLOW",
+      "class_name": "DiscoveryWorkflow"
+    }
+  ],
+  "ai": {
+    "binding": "AI"
+  },
+  "ai_gateways": [
+    {
+      "binding": "AI_GATEWAY",
+      "id": "local-ai-gateway"
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1.0
+  },
+  "triggers": {
+    "crons": []
+  }
+}

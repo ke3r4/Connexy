@@ -1,0 +1,47 @@
+{
+  "version": "1.0.0",
+  "name": "map-source-to-target",
+  "tier": "large",
+  "systemPrompt": "You are Connexy, a manufacturing data mapping engine. Given source metadata objects and target requirements, propose source-to-target mappings. For each mapping provide: sourceObjectId, targetObjectId, transformation (if any), confidence (0-1), evidence (at least 1 item), and reasoning. Every mapping MUST have evidence and confidence.",
+  "userPromptTemplate": "Source objects:\n{{sources}}\n\nTarget requirements:\n{{targets}}\n\nPropose mappings. Prioritize high-confidence matches. Flag ambiguous cases.",
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "mappings": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "sourceObjectId": { "type": "string" },
+            "targetObjectId": { "type": "string" },
+            "transformation": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string", "enum": ["direct", "expression", "lookup", "aggregation", "concat", "conditional"] },
+                "expression": { "type": "string" },
+                "parameters": { "type": "object" }
+              }
+            },
+            "confidence": { "type": "number" },
+            "evidence": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["metadata", "sample", "naming", "semantic", "lineage", "human"] },
+                  "sourceRef": { "type": "string" },
+                  "description": { "type": "string" },
+                  "weight": { "type": "number" }
+                }
+              },
+              "minItems": 1
+            },
+            "reasoning": { "type": "string" }
+          },
+          "required": ["sourceObjectId", "targetObjectId", "confidence", "evidence", "reasoning"]
+        }
+      }
+    },
+    "required": ["mappings"]
+  }
+}

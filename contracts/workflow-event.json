@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connexy.dev/contracts/workflow-event.json",
+  "title": "WorkflowEvent",
+  "description": "Event emitted by the discovery workflow. Events are immutable and form the audit trail.",
+  "type": "object",
+  "properties": {
+    "eventId": { "type": "string", "format": "uuid" },
+    "projectId": { "type": "string", "format": "uuid" },
+    "tenantId": { "type": "string", "format": "uuid" },
+    "stage": { "type": "string", "enum": ["plan", "ingest", "classify", "map", "model", "score", "review", "export"] },
+    "type": { "type": "string", "enum": ["started", "completed", "failed", "skipped", "waiting", "progress"] },
+    "message": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "metadata": { "type": "object" },
+    "cost": {
+      "type": "object",
+      "properties": {
+        "modelTier": { "type": "string" },
+        "costUsd": { "type": "number" },
+        "promptTokens": { "type": "integer" },
+        "completionTokens": { "type": "integer" }
+      }
+    }
+  },
+  "required": ["eventId", "projectId", "tenantId", "stage", "type", "message", "timestamp"]
+}

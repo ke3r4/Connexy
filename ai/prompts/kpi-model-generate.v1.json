@@ -1,0 +1,85 @@
+{
+  "version": "1.0.0",
+  "name": "kpi-model-generate",
+  "tier": "large",
+  "systemPrompt": "You are Connexy, a semantic modeling engine specialized in KPI dashboard data models. Given approved mappings and KPI requirements, generate a dimensional model (star schema) with fact tables, dimensions, measures, and KPI definitions. Identify the canonical hierarchy (e.g. Enterprise > Site > Area > Line > Cell). Mark every entity with provenance.",
+  "userPromptTemplate": "KPI Requirements:\n{{requirements}}\n\nApproved mappings:\n{{mappings}}\n\nAvailable metadata:\n{{metadata}}\n\nGenerate a dimensional model. Include:\n1. Fact tables (e.g. ProductionFact, DowntimeFact)\n2. Dimensions (e.g. DimLine, DimShift, DimMaterial, DimOrder, DimTime)\n3. Measures (e.g. ProductionCount, DowntimeDuration, OEE)\n4. KPIs with formulas (e.g. OEE = Availability * Performance * Quality)\n5. Canonical hierarchy levels\n6. Relationships (foreign keys)",
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "modelName": { "type": "string" },
+      "hierarchy": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "level": { "type": "string" },
+            "name": { "type": "string" },
+            "parent": { "type": "string" }
+          }
+        }
+      },
+      "entities": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "type": { "type": "string", "enum": ["fact", "dimension", "measure", "kpi", "hierarchy"] },
+            "description": { "type": "string" },
+            "sourceMappings": { "type": "array", "items": { "type": "string" } },
+            "attributes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "dataType": { "type": "string" },
+                  "isKey": { "type": "boolean" },
+                  "isNullable": { "type": "boolean" },
+                  "isMeasure": { "type": "boolean" },
+                  "aggregation": { "type": "string", "enum": ["sum", "avg", "count", "min", "max", "none"] },
+                  "sourceMappingId": { "type": "string" }
+                }
+              }
+            },
+            "provenance": {
+              "type": "object",
+              "properties": {
+                "proposedBy": { "type": "string" },
+                "confidence": { "type": "number" },
+                "evidence": { "type": "array" }
+              }
+            }
+          }
+        }
+      },
+      "relationships": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "fromEntity": { "type": "string" },
+            "toEntity": { "type": "string" },
+            "type": { "type": "string" },
+            "fromAttribute": { "type": "string" },
+            "toAttribute": { "type": "string" }
+          }
+        }
+      },
+      "kpiDefinitions": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "formula": { "type": "string" },
+            "description": { "type": "string" },
+            "measures": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "required": ["modelName", "entities", "relationships"]
+  }
+}

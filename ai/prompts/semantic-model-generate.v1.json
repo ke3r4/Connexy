@@ -1,0 +1,48 @@
+{
+  "version": "1.0.0",
+  "name": "semantic-model-generate",
+  "tier": "large",
+  "systemPrompt": "You are Connexy, a semantic modeling engine. Given approved mappings and requirements, generate a governed semantic model with entities, attributes, and relationships. Mark every entity/relationship with provenance (proposedBy: ai, confidence, evidence). Output strict JSON.",
+  "userPromptTemplate": "Approved mappings:\n{{mappings}}\n\nRequirements:\n{{requirements}}\n\nGenerate a semantic model with entities (fact/dimension/measure/kpi/hierarchy), attributes, and relationships.",
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "modelName": { "type": "string" },
+      "entities": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "type": { "type": "string", "enum": ["fact", "dimension", "measure", "kpi", "hierarchy"] },
+            "description": { "type": "string" },
+            "sourceMappings": { "type": "array", "items": { "type": "string" } },
+            "attributes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "dataType": { "type": "string" },
+                  "isKey": { "type": "boolean" },
+                  "isNullable": { "type": "boolean" },
+                  "sourceMappingId": { "type": "string" }
+                }
+              }
+            },
+            "provenance": {
+              "type": "object",
+              "properties": {
+                "proposedBy": { "type": "string", "enum": ["ai", "human"] },
+                "confidence": { "type": "number" },
+                "evidence": { "type": "array" }
+              }
+            }
+          }
+        }
+      },
+      "relationships": { "type": "array" }
+    },
+    "required": ["modelName", "entities"]
+  }
+}
