@@ -1,12 +1,13 @@
-import { WorkflowEntrypoint, WorkflowEvent, WorkflowStep } from 'cloudflare:workflows';
+import { WorkflowEntrypoint } from 'cloudflare:workers';
+import type { WorkflowEvent, WorkflowStep } from 'cloudflare:workers';
 import type { Env } from '../env.js';
-import { WorkersAIRunner } from '../../../packages/ai-engine/src/workers-ai-runner.js';
+import { WorkersAIRunner } from '@connexy/ai-engine';
 import {
   MetadataFileConnector, SAPErpConnector, SiemensOpcenterConnector, AvevaPiConnector,
   RockwellFactoryTalkConnector, WerumPasxConnector, TulipConnector, SepasoftConnector,
   AvevaWonderwareConnector, IgnitionConnector, OpcUaConnector, PlcTagsConnector,
-} from '../../../packages/connectors/src/index.js';
-import { registry } from '../../../packages/connectors/src/registry.js';
+} from '@connexy/connectors';
+import { registry } from '@connexy/connectors';
 
 // Register all connectors once
 registry.register(new MetadataFileConnector());
@@ -85,6 +86,8 @@ export class DiscoveryWorkflow extends WorkflowEntrypoint<Env, WorkflowParams> {
     };
 
     const costCapChecker = makeCostCapChecker();
+
+    await step.do('plan — parse intent via Workers AI', async () => {
       await this.updateStage(env, projectId, 'plan', 'running', { event: { stage: 'plan', type: 'started', message: 'Parsing user intent via Cloudflare Workers AI' } });
       const project = await env.DB.prepare('SELECT intent, workflow_type FROM projects WHERE id = ?').bind(projectId).first() as Record<string, string> | null;
       const intent = project?.intent || '';
@@ -266,9 +269,6 @@ export class DiscoveryWorkflow extends WorkflowEntrypoint<Env, WorkflowParams> {
                   maxTokens: 300,
                   checkCostCap: costCapChecker,
                 },
-                stage: 'map',
-                maxTokens: 300,
-              },
               (raw) => { try { return JSON.parse(raw); } catch { return { confidence: 0.5, reasoning: 'fallback', transformation: 'direct' }; } },
             );
             const aiResult = aiResponse.content as { confidence: number; reasoning: string; transformation: string };

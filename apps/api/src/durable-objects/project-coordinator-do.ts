@@ -1,4 +1,4 @@
-import { DurableObject } from 'durable-objects';
+import { DurableObject } from 'cloudflare:workers';
 
 interface WorkflowState {
   projectId: string;

@@ -22,8 +22,8 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
-    "wrangler": "^3.60.0",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "wrangler": "^4.104.0"
   },
   "engines": {
     "node": ">=20.0.0"

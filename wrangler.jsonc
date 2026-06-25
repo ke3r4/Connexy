@@ -2,7 +2,7 @@
   "$schema": "https://schema.wrangler.dev/worker-3.60.json",
   "name": "connexy-api",
   "main": "apps/api/src/index.ts",
-  "compatibility_date": "2024-06-24",
+  "compatibility_date": "2025-04-01",
   "compatibility_flags": ["nodejs_compat"],
   "vars": {
     "ENVIRONMENT": "development"
@@ -11,7 +11,7 @@
     {
       "binding": "DB",
       "database_name": "connexy",
-      "database_id": "local-dev-db"
+      "database_id": "e52ab74f-c440-4ac5-bea0-5942ea350771"
     }
   ],
   "vectorize": [
@@ -47,23 +47,23 @@
   "kv_namespaces": [
     {
       "binding": "KV_CONFIG",
-      "id": "local-kv-config"
+      "id": "a5ff70985e2540329ad82669e6feff66"
     },
     {
       "binding": "KV_SESSIONS",
-      "id": "local-kv-sessions"
+      "id": "e676cbb26bbd46fb8650ab758b9a1024"
     }
   ],
-  "queues": [
-    {
-      "binding": "INGEST_QUEUE",
-      "queue_name": "ingest-queue"
-    },
-    {
-      "binding": "EXPORT_QUEUE",
-      "queue_name": "export-queue"
-    }
-  ],
+  "queues": {
+    "producers": [
+      { "binding": "INGEST_QUEUE", "queue": "ingest-queue" },
+      { "binding": "EXPORT_QUEUE", "queue": "export-queue" }
+    ],
+    "consumers": [
+      { "queue": "ingest-queue", "max_batch_size": 10 },
+      { "queue": "export-queue", "max_batch_size": 10 }
+    ]
+  },
   "workflows": [
     {
       "name": "DISCOVERY_WORKFLOW",
@@ -74,17 +74,8 @@
   "ai": {
     "binding": "AI"
   },
-  "ai_gateways": [
-    {
-      "binding": "AI_GATEWAY",
-      "id": "local-ai-gateway"
-    }
-  ],
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1.0
-  },
-  "triggers": {
-    "crons": []
   }
 }
